@@ -4,7 +4,7 @@ on: [ push ]
 
 jobs:
   fetch-secret:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Install Vault CLI
         run: |
