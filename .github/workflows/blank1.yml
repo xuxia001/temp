@@ -1,0 +1,50 @@
+name: Vault Secret Fetch
+
+on: [ push ]
+
+jobs:
+  fetch-secret:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Vault CLI
+        run: |
+          # 下载安装Vault CLI
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          # 下载指定版本的Vault可执行文件（Linux 64 位）。如果不能下载则可以去PAM下载中心或安装目录下载。
+          curl -sLo vault.zip https://releases.hashicorp.com/vault/1.14.10/vault_1.14.10_linux_amd64.zip
+          unzip vault.zip
+          sudo mv vault /usr/local/bin/
+
+      - name: Authenticate with Vault using AppRole and Fetch Secret from Vault
+        run: |
+          # 设置Vault服务器的地址(确保Github能访问到该地址)。如：https://vault.your-domain.com，可参见pas.properties配置项pas.vault.client-url
+          export VAULT_ADDR=https://epv.pam-test.paraview.cn
+          # 忽略Vault服务器的SSL证书验证（通常在开发环境中使用，不建议在生产环境中使用）。
+          export VAULT_SKIP_VERIFY=true
+          # PAM系统【密码授权】->【查看详情】->【配置向导】->AppID（下图位置1）
+          export ROLE_ID="6253f982-f156-e4b4-f381-3187dcb19129"
+          # PAM系统【密码授权】->【查看详情】->【配置向导】->AppSecret（下图位置2）
+          export SECRET_ID="919b82e6-098a-8256-b96a-0d48535e7af2"
+          # 使用AppRole登录Vault获取token
+          export VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id=$ROLE_ID secret_id=$SECRET_ID)
+          #echo "The VAULT_TOKEN is: $VAULT_TOKEN"
+          # 通过 echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV 将使 VAULT_TOKEN 在整个作业（job）期间都可用
+          #echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
+          # 从Vault中获取指定路径的密钥值。 
+          # 这里 `-field=passwd` 用于指定提取字段 `passwd` 的值。
+          # `Account-Path` 是Vault中存储秘密的路径。PAM系统【密码授权】->【查看详情】->【配置向导】->账号路径（下图位置3）
+          # Account-Path替换后的示例：SECRET=$(vault kv get -field=passwd /3003476385350337032/3004853386225311956)
+          SECRET=$(vault kv get -field=passwd /3003476385350337032/3004853386225311956)
+          # 打印获取到的Vault密码（请注意，实际环境中敏感信息的输出需要谨慎处理）。
+          echo "The password is: $SECRET"
+
+      - name: End Fetch Secret from Vault
+        run: |
+          #export VAULT_ADDR=https://vault.your-domain.com
+          #export VAULT_SKIP_VERIFY=true
+          # 验证echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV 在整个作业（job）期间都可用
+          #echo "The VAULT_TOKEN is: $VAULT_TOKEN"
+          #SECRET=$(vault kv get -field=passwd /3003476385350337032/3004853386225311956)
+          #echo "The password is: $SECRET"
+          echo "End Fetch Secret from Vault"
