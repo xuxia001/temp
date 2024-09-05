@@ -12,7 +12,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y unzip
           # 下载指定版本的Vault可执行文件（Linux 64 位）。如果不能下载则可以去PAM下载中心或安装目录下载。
-          curl -sLo vault.zip https://releases.pam-vault.com/vault/1.14.10/vault_1.14.10_linux_amd64.zip
+          curl -sLo vault.zip https://releases.hashicorp.com/vault/1.14.10/vault_1.14.10_linux_amd64.zip
           unzip vault.zip
           sudo mv vault /usr/local/bin/
 
@@ -35,7 +35,7 @@ jobs:
           # 这里 `-field=passwd` 用于指定提取字段 `passwd` 的值。
           # `Account-Path` 是Vault中存储秘密的路径。PAM系统【密码授权】->【查看详情】->【配置向导】->账号路径（下图位置3）
           # Account-Path替换后的示例：SECRET=$(vault kv get -field=passwd /2917355865793750351/3003689604706796667)
-          SECRET=$(vault kv get -field=passwd Account-Path)
+          SECRET=$(vault kv get -field=passwd /2917355865793750351/3003689604706796667)
           # 打印获取到的Vault密码（请注意，实际环境中敏感信息的输出需要谨慎处理）。
           echo "The password is: $SECRET"
 
