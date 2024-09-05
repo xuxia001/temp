@@ -1,6 +1,6 @@
 name: Vault Secret Fetch
 
-on: [ push ]
+on: [ pull_request ]
 
 jobs:
   fetch-secret:
